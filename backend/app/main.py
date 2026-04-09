@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.services.weather_service import fetch_oslo_weather
+
 app = FastAPI()
 
 allowed_origins = [
@@ -20,3 +22,8 @@ app.add_middleware(
 @app.get("/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/weather")
+def get_weather() -> dict:
+    return fetch_oslo_weather()
