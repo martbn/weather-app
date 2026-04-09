@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.models.weather import WeatherResponse
+
 from app.services.weather_service import fetch_weather
 
 app = FastAPI()
@@ -24,6 +26,6 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/weather")
-def get_weather(city: str = Query(default="Oslo")) -> dict:
+@app.get("/weather", response_model=WeatherResponse)
+def get_weather(city: str = Query(default="Oslo")) -> WeatherResponse:
     return fetch_weather(city)

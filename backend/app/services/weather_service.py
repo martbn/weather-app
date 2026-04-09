@@ -1,5 +1,6 @@
 import requests
 from fastapi import HTTPException
+from app.models.weather import WeatherResponse
 
 OPEN_METEO_WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
 OPEN_METEO_GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
@@ -31,7 +32,7 @@ def get_coordinates(city: str) -> tuple[float, float]:
     return result["latitude"], result["longitude"]
 
 
-def fetch_weather(city: str) -> dict:
+def fetch_weather(city: str) -> WeatherResponse:
     latitude, longitude = get_coordinates(city)
 
     params = {
@@ -57,15 +58,15 @@ def fetch_weather(city: str) -> dict:
 
     weather_data = response.json()
 
-    return {
-    "location": city,
-    "current": {
+    return WeatherResponse(
+    location=city,
+    current={
         "temperature": weather_data["current"]["temperature_2m"],
         "wind_speed": weather_data["current"]["wind_speed_10m"],
     },
-    "today": {
+    today={
         "temperature_max": weather_data["daily"]["temperature_2m_max"][0],
         "temperature_min": weather_data["daily"]["temperature_2m_min"][0],
         "humidity_mean": weather_data["daily"]["relative_humidity_2m_mean"][0],
     },
-}
+)
