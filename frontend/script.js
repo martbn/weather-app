@@ -1,12 +1,28 @@
 const statusElement = document.getElementById("status");
+const cityInputElement = document.getElementById("city-input");
+const loadWeatherButtonElement = document.getElementById("load-weather-button");
 
 async function loadWeather() {
+  const city = cityInputElement.value.trim();
+
+  if (!city) {
+    statusElement.textContent = "Please enter a city";
+    return;
+  }
+
   statusElement.textContent = "Loading weather data...";
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/weather");
+    const response = await fetch(
+      `http://127.0.0.1:8000/weather?city=${encodeURIComponent(city)}`,
+    );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        statusElement.textContent = `City "${city}" was not found`;
+        return;
+      }
+
       throw new Error(`HTTP error: ${response.status}`);
     }
 
@@ -24,5 +40,7 @@ async function loadWeather() {
     console.error("Failed to fetch weather data:", error);
   }
 }
+
+loadWeatherButtonElement.addEventListener("click", loadWeather);
 
 loadWeather();

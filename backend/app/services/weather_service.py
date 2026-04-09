@@ -1,33 +1,64 @@
 import requests
 from fastapi import HTTPException
 
-OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
-OSLO_LATITUDE = 59.9139
-OSLO_LONGITUDE = 10.7522
+OPEN_METEO_WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
+OPEN_METEO_GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
 
 
-def fetch_oslo_weather() -> dict:
+def get_coordinates(city: str) -> tuple[float, float]:
+    try:
+        response = requests.get(
+            OPEN_METEO_GEOCODING_URL,
+            params={"name": city, "count": 1},
+            timeout=10,
+        )
+        response.raise_for_status()
+    except requests.RequestException as error:
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to fetch location data",
+        ) from error
+
+    data = response.json()
+
+    if "results" not in data or len(data["results"]) == 0:
+        raise HTTPException(
+            status_code=404,
+            detail=f"City '{city}' not found",
+        )
+
+    result = data["results"][0]
+    return result["latitude"], result["longitude"]
+
+
+def fetch_weather(city: str) -> dict:
+    latitude, longitude = get_coordinates(city)
+
     params = {
-        "latitude": OSLO_LATITUDE,
-        "longitude": OSLO_LONGITUDE,
+        "latitude": latitude,
+        "longitude": longitude,
         "current": "temperature_2m,wind_speed_10m",
         "daily": "temperature_2m_max,temperature_2m_min",
         "timezone": "auto",
     }
 
     try:
-        response = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+        response = requests.get(
+            OPEN_METEO_WEATHER_URL,
+            params=params,
+            timeout=10,
+        )
         response.raise_for_status()
     except requests.RequestException as error:
         raise HTTPException(
             status_code=502,
-            detail="Failed to fetch weather data from external API",
+            detail="Failed to fetch weather data",
         ) from error
 
     weather_data = response.json()
 
     return {
-        "location": "Oslo",
+        "location": city,
         "current": {
             "temperature": weather_data["current"]["temperature_2m"],
             "wind_speed": weather_data["current"]["wind_speed_10m"],

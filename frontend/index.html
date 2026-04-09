@@ -9,8 +9,14 @@
   <body>
     <main class="container">
       <h1>Weather App</h1>
-      <p>Backend status:</p>
-      <div id="status">Loading...</div>
+
+      <div class="search">
+        <label for="city-input">City</label>
+        <input id="city-input" type="text" value="Oslo" />
+        <button id="load-weather-button">Load weather</button>
+      </div>
+
+      <div id="status">Loading weather data...</div>
     </main>
 
     <script src="./script.js"></script>
