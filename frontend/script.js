@@ -1,17 +1,46 @@
 const statusElement = document.getElementById("status");
+const cityInputElement = document.getElementById("city-input");
+const loadWeatherButtonElement = document.getElementById("load-weather-button");
 
-async function loadBackendStatus() {
-  statusElement.textContent = "Loading...";
+async function loadWeather() {
+  const city = cityInputElement.value.trim();
+
+  if (!city) {
+    statusElement.textContent = "Please enter a city";
+    return;
+  }
+
+  statusElement.textContent = "Loading weather data...";
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/health");
+    const response = await fetch(
+      `http://127.0.0.1:8000/weather?city=${encodeURIComponent(city)}`,
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        statusElement.textContent = `City "${city}" was not found`;
+        return;
+      }
+
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
     const data = await response.json();
 
-    statusElement.textContent = `Backend is ${data.status}`;
+    statusElement.innerHTML = `
+      <p><strong>Location:</strong> ${data.location}</p>
+      <p><strong>Current temperature:</strong> ${data.current.temperature}°C</p>
+      <p><strong>Wind speed:</strong> ${data.current.wind_speed} km/h</p>
+      <p><strong>Today's max:</strong> ${data.today.temperature_max}°C</p>
+      <p><strong>Today's min:</strong> ${data.today.temperature_min}°C</p>
+    `;
   } catch (error) {
-    statusElement.textContent = "Could not connect to backend";
-    console.error("Failed to fetch backend status:", error);
+    statusElement.textContent = "Could not load weather data";
+    console.error("Failed to fetch weather data:", error);
   }
 }
 
-loadBackendStatus();
+loadWeatherButtonElement.addEventListener("click", loadWeather);
+
+loadWeather();
