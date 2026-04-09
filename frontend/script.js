@@ -14,7 +14,7 @@ async function loadWeather() {
 
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/weather?city=${encodeURIComponent(city)}`,
+      `/api/weather?city=${encodeURIComponent(city)}`,
     );
 
     if (!response.ok) {
