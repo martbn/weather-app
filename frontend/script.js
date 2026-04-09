@@ -14,7 +14,7 @@ async function loadWeather() {
 
   try {
     const response = await fetch(
-      `/api/weather?city=${encodeURIComponent(city)}`,
+      `${window.APP_CONFIG.apiBaseUrl}/weather?city=${encodeURIComponent(city)}`,
     );
 
     if (!response.ok) {
@@ -34,6 +34,7 @@ async function loadWeather() {
       <p><strong>Wind speed:</strong> ${data.current.wind_speed} km/h</p>
       <p><strong>Today's max:</strong> ${data.today.temperature_max}°C</p>
       <p><strong>Today's min:</strong> ${data.today.temperature_min}°C</p>
+      <p><strong>Today's mean humidity:</strong> ${data.today.humidity_mean}%</p>
     `;
   } catch (error) {
     statusElement.textContent = "Could not load weather data";
